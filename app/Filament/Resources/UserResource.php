@@ -25,22 +25,25 @@ class UserResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->required()
                     ->label('Nome')
+                    ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('email')
+                    ->label('E-mail')
                     ->email()
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('password')
-                    ->password()
                     ->label('Senha')
-                    ->required(fn (string $context) => $context === 'create')
-                    ->dehydrated(fn ($state) => filled($state))
+                    ->password()
+                    ->required(fn(string $context) => $context === 'create')
+                    ->dehydrateStateUsing(fn($state) => !empty($state) ? bcrypt($state) : null)
+                    ->dehydrated(fn($state) => filled($state))
                     ->maxLength(255),
                 Select::make('roles')
+                    ->label('Função')
                     ->multiple()
-                    ->relationship('roles', 'name')
+                    ->relationship('roles', 'name', fn(Builder $query) => auth()->user()->hasRole('Admin') ? null : $query->where('name', '!=', 'Admin'))
                     ->preload()
             ]);
     }
@@ -93,4 +96,13 @@ class UserResource extends Resource
         ];
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return auth()->user()->hasRole('Admin') 
+            ? parent::getEloquentQuery()
+            : parent::getEloquentQuery()->whereHas(
+                'roles',
+                fn(Builder $query) => $query->where('name', '!=', 'Admin')
+            );
+    }
 }
