@@ -19,7 +19,7 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
-    
+
     protected static ?string $modelLabel = 'Usuário';
 
     public static function form(Form $form): Form
@@ -34,6 +34,7 @@ class UserResource extends Resource
                     ->label('E-mail')
                     ->email()
                     ->required()
+                    ->unique(ignoreRecord: true)
                     ->maxLength(255),
                 Forms\Components\TextInput::make('password')
                     ->label('Senha')
@@ -44,7 +45,6 @@ class UserResource extends Resource
                     ->maxLength(255),
                 Select::make('roles')
                     ->label('Função')
-                    ->multiple()
                     ->relationship('roles', 'name', fn(Builder $query) => auth()->user()->hasRole('Admin') ? null : $query->where('name', '!=', 'Admin'))
                     ->preload()
             ]);
@@ -107,4 +107,5 @@ class UserResource extends Resource
                 fn(Builder $query) => $query->where('name', '!=', 'Admin')
             );
     }
+
 }

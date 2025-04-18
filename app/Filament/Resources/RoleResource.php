@@ -75,4 +75,5 @@ class RoleResource extends Resource
             'index' => Pages\ManageRoles::route('/'),
         ];
     }
+
 }

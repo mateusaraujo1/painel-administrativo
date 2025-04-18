@@ -76,4 +76,5 @@ class PermissionResource extends Resource
             'index' => Pages\ManagePermissions::route('/'),
         ];
     }
+
 }
